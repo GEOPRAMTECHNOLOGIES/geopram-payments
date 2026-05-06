@@ -22,8 +22,9 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(fileUpload());
 app.use(express.static('public'));
 
-// Data storage paths
-const dataDir = path.join(__dirname, 'data');
+// Data storage paths - Use /tmp for Vercel compatibility
+const isProduction = process.env.NODE_ENV === 'production';
+const dataDir = isProduction ? '/tmp/geopram-data' : path.join(__dirname, 'data');
 const transactionsFile = path.join(dataDir, 'transactions.json');
 const productsFile = path.join(dataDir, 'products.json');
 
@@ -309,12 +310,12 @@ app.post('/api/admin/upload-image', verifyToken, (req, res) => {
   try {
     const { imageUrl, imageName } = req.body;
 
-    // If image file is uploaded
-    if (req.files && req.files.image) {
-      const uploadDir = path.join(__dirname, 'public', 'uploads');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
+  // If image file is uploaded
+      if (req.files && req.files.image) {
+        const uploadDir = isProduction ? '/tmp/geopram-uploads' : path.join(__dirname, 'public', 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
 
       const filename = `${Date.now()}-${req.files.image.name}`;
       const filepath = path.join(uploadDir, filename);

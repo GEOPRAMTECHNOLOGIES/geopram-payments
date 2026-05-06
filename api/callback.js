@@ -2,12 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
 
-// Store transactions
-const transactionsFile = path.join(__dirname, '../data/transactions.json');
+// Store transactions - Use /tmp for Vercel compatibility
+const isProduction = process.env.NODE_ENV === 'production';
+const transactionsFile = isProduction ? '/tmp/geopram-data/transactions.json' : path.join(__dirname, '../data/transactions.json');
 
 // Ensure data directory exists
-if (!fs.existsSync(path.join(__dirname, '../data'))) {
-  fs.mkdirSync(path.join(__dirname, '../data'), { recursive: true });
+const dataDir = isProduction ? '/tmp/geopram-data' : path.join(__dirname, '../data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
 }
 
 const handleCallback = (req, res) => {

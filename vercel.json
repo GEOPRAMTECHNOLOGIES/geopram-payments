@@ -13,6 +13,7 @@
     }
   ],
   "env": {
+    "NODE_ENV": "production",
     "CONSUMER_KEY": "@consumer_key",
     "CONSUMER_SECRET": "@consumer_secret",
     "PASSKEY": "@passkey",
@@ -21,6 +22,7 @@
     "ADMIN_PASSWORD": "@admin_password",
     "ADMIN_PHONE": "@admin_phone",
     "VERIFY_EMAIL": "@verify_email",
-    "JWT_SECRET": "@jwt_secret"
+    "JWT_SECRET": "@jwt_secret",
+    "SHORTCODE": "@shortcode"
   }
 }
