@@ -3,11 +3,10 @@ const path = require('path');
 const moment = require('moment');
 
 // Store transactions - Use /tmp for Vercel compatibility
-const isProduction = process.env.NODE_ENV === 'production';
-const transactionsFile = isProduction ? '/tmp/geopram-data/transactions.json' : path.join(__dirname, '../data/transactions.json');
+const dataDir = process.env.NODE_ENV === 'production' ? '/tmp/geopram-data' : path.join(__dirname, '../data');
+const transactionsFile = path.join(dataDir, 'transactions.json');
 
 // Ensure data directory exists
-const dataDir = isProduction ? '/tmp/geopram-data' : path.join(__dirname, '../data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }

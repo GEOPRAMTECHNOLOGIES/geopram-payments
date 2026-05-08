@@ -22,14 +22,31 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(fileUpload());
 app.use(express.static('public'));
 
-// Data storage paths - Use /tmp for Vercel compatibility
-const isProduction = process.env.NODE_ENV === 'production';
-const dataDir = isProduction ? '/tmp/geopram-data' : path.join(__dirname, 'data');
+// Ensure data directory exists
+const fs = require('fs');
+const path = require('path');
+
+// Ensure data directory exists (for both local and Vercel)
+const dataDir = process.env.NODE_ENV === 'production' ? '/tmp/geopram-data' : path.join(__dirname, 'data');
 const transactionsFile = path.join(dataDir, 'transactions.json');
 const productsFile = path.join(dataDir, 'products.json');
 const ordersFile = path.join(dataDir, 'orders.json');
 
-// Initialize orders file
+function ensureDataDir() {
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
+
+ensureDataDir();
+
+// Initialize data files
+if (!fs.existsSync(transactionsFile)) {
+  fs.writeFileSync(transactionsFile, JSON.stringify([], null, 2));
+}
+if (!fs.existsSync(productsFile)) {
+  fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
+}
 if (!fs.existsSync(ordersFile)) {
   fs.writeFileSync(ordersFile, JSON.stringify([], null, 2));
 }
