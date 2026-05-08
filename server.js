@@ -467,16 +467,19 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`
+// Only start server if not in serverless environment
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`
 ╔════════════════════════════════════════╗
 ║  🎉 GeoPram Payment System Started  🎉  ║
 ║  ✅ Server running on port ${PORT}        ║
 ║  🔐 Admin Login: geopramtech@gmail.com ║
 ║  📱 STK Push Ready                      ║
 ╚════════════════════════════════════════╝
-  `);
-});
+    `);
+  });
+}
 
 module.exports = app;
