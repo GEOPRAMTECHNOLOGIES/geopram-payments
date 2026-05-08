@@ -22,10 +22,6 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(fileUpload());
 app.use(express.static('public'));
 
-// Ensure data directory exists
-const fs = require('fs');
-const path = require('path');
-
 // Ensure data directory exists (for both local and Vercel)
 const dataDir = process.env.NODE_ENV === 'production' ? '/tmp/geopram-data' : path.join(__dirname, 'data');
 const transactionsFile = path.join(dataDir, 'transactions.json');
