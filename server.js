@@ -21,7 +21,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(fileUpload());
 
-// Serve static files
+// Serve static files FIRST
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Root route
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve frontend for all other routes (SPA support)
+// All other routes serve frontend (must be last)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
