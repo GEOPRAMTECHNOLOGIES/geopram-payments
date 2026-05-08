@@ -1146,6 +1146,21 @@
                 statusDiv.innerHTML = '<div style="text-align: center;"><div class="loading"></div><p>Sending payment request...</p></div>';
                 statusDiv.style.display = 'block';
 
+                // Create order first
+                const orderResponse = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerName: 'Guest Customer',
+                        customerPhone: phone,
+                        items: [{ name: currentPaymentData.productName, price: currentPaymentData.amount }],
+                        totalAmount: currentPaymentData.amount,
+                        status: 'pending'
+                    })
+                });
+
+                const orderData = await orderResponse.json();
+
                 const response = await fetch(`${API_URL}/pay`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1159,6 +1174,21 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    // Update order with checkout request ID
+                    if (orderData.success) {
+                        await fetch(`${API_URL}/admin/orders/${orderData.order.id}`, {
+                            method: 'PUT',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${authToken}`
+                            },
+                            body: JSON.stringify({
+                                checkoutRequestID: data.checkoutRequestID,
+                                status: 'processing'
+                            })
+                        });
+                    }
+
                     statusDiv.innerHTML = `
                         <div style="background: #dcfce7; color: #15803d; padding: 20px; border-radius: 10px; text-align: center;">
                             <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 10px;"></i>

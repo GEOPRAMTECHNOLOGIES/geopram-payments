@@ -27,6 +27,12 @@ const isProduction = process.env.NODE_ENV === 'production';
 const dataDir = isProduction ? '/tmp/geopram-data' : path.join(__dirname, 'data');
 const transactionsFile = path.join(dataDir, 'transactions.json');
 const productsFile = path.join(dataDir, 'products.json');
+const ordersFile = path.join(dataDir, 'orders.json');
+
+// Initialize orders file
+if (!fs.existsSync(ordersFile)) {
+  fs.writeFileSync(ordersFile, JSON.stringify([], null, 2));
+}
 
 // Ensure data directory exists
 if (!fs.existsSync(dataDir)) {
@@ -360,6 +366,71 @@ app.get('/api/admin/stats', verifyToken, (req, res) => {
     };
 
     res.json({ stats });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Create New Order
+ */
+app.post('/api/orders', (req, res) => {
+  try {
+    const { customerName, customerPhone, items, totalAmount, checkoutRequestID } = req.body;
+
+    const orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+
+    const newOrder = {
+      id: Date.now().toString(),
+      customerName: customerName || 'Guest',
+      customerPhone,
+      items: items || [],
+      totalAmount: parseFloat(totalAmount) || 0,
+      status: 'pending',
+      checkoutRequestID: checkoutRequestID || null,
+      createdAt: new Date().toISOString()
+    };
+
+    orders.push(newOrder);
+    fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
+
+    res.json({ success: true, order: newOrder });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get All Orders (Admin)
+ */
+app.get('/api/admin/orders', verifyToken, (req, res) => {
+  try {
+    const orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+    res.json({ orders, count: orders.length });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Update Order Status (Admin)
+ */
+app.put('/api/admin/orders/:id', verifyToken, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+
+    const orderIndex = orders.findIndex(o => o.id === id);
+    if (orderIndex === -1) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    orders[orderIndex].status = status;
+    orders[orderIndex].updatedAt = new Date().toISOString();
+    fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
+
+    res.json({ success: true, order: orders[orderIndex] });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
