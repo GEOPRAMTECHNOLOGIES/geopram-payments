@@ -21,19 +21,6 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(fileUpload());
 
-// Serve static files FIRST
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Root route
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// All other routes serve frontend (must be last)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 // Ensure data directory exists (for both local and Vercel)
 const dataDir = process.env.NODE_ENV === 'production' ? '/tmp/geopram-data' : path.join(__dirname, 'data');
 const transactionsFile = path.join(dataDir, 'transactions.json');
@@ -481,5 +468,17 @@ if (require.main === module) {
     `);
   });
 }
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve frontend for root and SPA routes (must be at the end)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 module.exports = app;
