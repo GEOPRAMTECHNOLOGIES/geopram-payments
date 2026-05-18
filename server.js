@@ -330,7 +330,8 @@ app.post('/api/admin/upload-image', verifyToken, (req, res) => {
 
   // If image file is uploaded
       if (req.files && req.files.image) {
-        const uploadDir = isProduction ? '/tmp/geopram-uploads' : path.join(__dirname, 'public', 'uploads');
+        // const uploadDir = isProduction ? '/tmp/geopram-uploads' : path.join(__dirname, 'public', 'uploads');
+        const uploadDir = process.env.NODE_ENV === 'production' ? '/tmp/geopram-uploads' : path.join(__dirname, 'public', 'uploads');
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
